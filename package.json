@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-	"test": "mocha"
+    "test": "mocha"
   },
   "dependencies": {
     "body-parser": "~1.0.0",
     "debug": "~0.7.4",
     "express": "~4.0.0",
     "mocha": "^1.18.2",
+    "mongodb": "^1.4.0",
+    "monk": "^0.8.1",
     "morgan": "~1.0.0",
     "nodeunit": "^0.8.6",
     "supertest": "^0.11.0"
