@@ -5,6 +5,6 @@ var app = require('../app.js');
 
 describe('GET /', function() {
 	it('respond with plain text', function(done) {
-		request(app).get('/').expect(200, done);
+		request(app).get('/api/v1').expect(200, done);
 	});
 });
