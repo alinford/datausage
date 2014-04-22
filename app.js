@@ -10,7 +10,7 @@ var db = monk('localhost/datausagetest1');
 var app = express();
 
 
-app.use(logger('dev'));
+app.use(logger());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(express.static(path.join(__dirname, 'public')));
