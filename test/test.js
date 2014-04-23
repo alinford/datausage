@@ -25,4 +25,15 @@ describe('POST /auth/request', function() {
 				done();
 			});
 	});
+
+	it ('responds with 200 if gsm number is present', function(done) {
+		request(app).post('/api/v1/datausage/auth/request')
+			.set('Content-Type', 'application/json')
+			.send({gsmnumber: 07408867211})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err);
+				done();
+			});
+	});
 });
