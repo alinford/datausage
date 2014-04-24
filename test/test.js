@@ -21,7 +21,7 @@ describe('POST /auth/request', function() {
 			.expect(400)
 			.end(function(err, res) {
 				should.not.exist(err);
-				res.body.should.have.property("error", "missing GSM number in request");
+				res.body.should.have.property("msg", "missing GSM number in request");
 				done();
 			});
 	});
