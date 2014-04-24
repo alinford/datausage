@@ -39,22 +39,46 @@ router.post('/auth/request', function(req, res) {
 				if (post_res.error) {
 					debug('error contacting nexmo: '+post_res.error.message);
 					res.send(400, {msg: "error sending SMS"});
+				} else {
+					var db = req.db;
+					var collection = db.get('awaitingVerification');
+					var p = collection.insert({gsmnumber: req.body.gsmnumber, pin: pin, date: new Date()});
+					p.on('error', function(err) {
+						debug('cannot insert PIN to db!');
+						res.send(400, {msg: "cannot insert PIN to DB"});
+					});
+					p.on('success', function(doc) {
+						debug('PIN stored in db');
+						res.send(200, {msg: "PIN sent", pin: pin});
+					});
 				}
-			})
-		res.send(200, {msg: "PIN sent"});
+			});
 	}
 
 });
 
 router.post('/auth/verify', function(req, res) {
 	if(!req.body.pin) {
-		res.send(new Error());
+		res.send(400, {msg: "missing PIN in request"});
+	} else if(!req.body.gsmnumber) {
+		res.send(400, {msg: "missing GSM number in request"});
 	} else {
 		// search for all entries for gsm number from awaitingVerification table.
 		// compare submitted pin with all pin's generated for that gsm number.
 		// Error() or oauth2ify() with passport.js bearer token if any pin's match.
 		// remove all entries for that gsm number from awaitingVerification collection.
-		res.send(req.body.pin);
+		var db = req.db;
+		var collection = db.get('awaitingVerification');
+		var p = collection.findOne({pin: req.body.pin, gsmnumber: req.body.gsmnumber});
+		p.on('success', function(doc) {
+			debug('PIN found! ' + doc.pin);
+			//TODO: enforce recent matches only
+			res.send(200, {token: req.body.pin});
+		});
+		p.on('error', function(err) {
+			debug('PIN not found');
+			res.send(400, {msg: "no recent PIN found for that GSM number"});
+		});
 	}
 });
 
