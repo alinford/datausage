@@ -17,7 +17,7 @@ describe('GET /datausage', function() {
 
 describe('POST /auth/request', function() {
 	it('responds with error if no gsm number present', function(done) {
-		request(app).post('/api/v1/datausage/auth/request')
+		request(app).post('/api/v1/auth/request')
 			.set('Content-Type', 'application/json')
 			.send({foo: 'bar'})
 			.expect(400)
@@ -29,7 +29,7 @@ describe('POST /auth/request', function() {
 	});
 
 	it ('responds with 200 if gsm number is present', function(done) {
-		request(app).post('/api/v1/datausage/auth/request')
+		request(app).post('/api/v1/auth/request')
 			.set('Content-Type', 'application/json')
 			.send({gsmnumber: 447408867211})
 			.expect(200)
@@ -44,7 +44,7 @@ describe('POST /auth/request', function() {
 
 describe('POST /auth/verify', function() {
 	it('responds with error if no PIN present in request', function(done) {
-		request(app).post('/api/v1/datausage/auth/verify')
+		request(app).post('/api/v1/auth/verify')
 			.set('Content-Type', 'application/json')
 			.send({foo: 'bar'})
 			.expect(400)
@@ -56,7 +56,7 @@ describe('POST /auth/verify', function() {
 	});
 
 	it('responds with 200 if PIN is verified correctly', function(done) {
-		request(app).post('/api/v1/datausage/auth/verify')
+		request(app).post('/api/v1/auth/verify')
 			.set('Content-Type', 'application/json')
 			.send({gsmnumber: 447408867211, pin: cached_pin})
 			.expect(200)

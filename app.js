@@ -2,13 +2,26 @@ var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
-var routes = require('./routes/index');
+var mainRoute = require('./routes/index');
+var authRoute = require('./routes/auth');
+var passport = require('passport');
+var BearerStrategy = require('passport-http-bearer').Strategy;
 
 var monk = require('monk');
 var db = monk('localhost/datausagetest1');
 
-var app = express();
+passport.use(new BearerStrategy(
+	function(token, done) {
+		/* User.findOne({ token: token}, function (err, user) {
+			if (err) {return done(err);}
+			if (!user) {return done(null, false);}
+			return done(null, user, {scope: 'read'});
+		});
+		 */
+	}
+));
 
+var app = express();
 
 app.use(logger());
 app.use(bodyParser.json());
@@ -20,7 +33,8 @@ app.use(function(req,res,next) {
 	next();
 });
 
-app.use('/api/v1/datausage', routes);
+app.use('/api/v1/datausage', mainRoute);
+app.use('/api/v1/auth', authRoute);
 
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {
