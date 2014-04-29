@@ -3,8 +3,7 @@ var router = express.Router();
 var debug = require('debug')('datausage:routes');
 var request = require('superagent');
 var Chance = require('chance');
-var oauth2orize = require('oauth2orize');
-//var server = oauth2orize.createServer();
+var crypto = require('crypto');
 
 
 router.post('/request', function(req, res) {
@@ -63,7 +62,11 @@ router.post('/verify', function(req, res) {
 		p.on('success', function(doc) {
 			debug('PIN found! ' + doc.pin);
 			//TODO: enforce recent matches only
-			res.send(200, {token: req.body.pin});
+			var token = "";
+			crypto.randomBytes(32, function(ex, buf) {
+				token = buf.toString('hex');
+			});
+			res.send(200, {token: token});
 		});
 		p.on('error', function(err) {
 			debug('PIN not found');
