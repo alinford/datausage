@@ -63,9 +63,13 @@ router.post('/verify', function(req, res) {
 			debug('PIN found! ' + doc.pin);
 			//TODO: enforce recent matches only
 			var token = "";
-			crypto.randomBytes(32, function(ex, buf) {
-				token = buf.toString('hex');
-			});
+			try {
+				var buf = crypto.randomBytes(32);
+				debug('have %d of random data: %s', buf.length, buf);
+			} catch (ex) {
+				// TODO handle error
+			}
+			token = buf.toString('hex');
 			res.send(200, {token: token});
 		});
 		p.on('error', function(err) {
