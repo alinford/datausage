@@ -16,8 +16,8 @@ passport.use(new BearerStrategy(
 			if (err) {return done(err);}
 			if (!user) {return done(null, false);}
 			return done(null, user, {scope: 'read'});
-		});
-		 */
+		}); */
+		return done(null, 'foo');
 	}
 ));
 

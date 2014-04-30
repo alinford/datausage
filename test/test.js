@@ -7,11 +7,11 @@ var app = require('../app.js');
 var cached_pin = "";
 
 describe('GET /datausage', function() {
-	it('responds with json', function (done) {
+	it('responds with unauthorized', function (done) {
 		request(app).get('/api/v1/datausage')
 			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200, done);
+			.set('token', 'a6d6s6f5d')
+			.expect(401, done);
 	});
 });
 

@@ -1,9 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var debug = require('debug')('datausage:routes');
+var passport = require('passport');
 
 
-router.get('/', function(req, res) {
+router.get('/', passport.authenticate('bearer', {session: false}), function(req, res) {
 	debug('getting summary');
 	var db = req.db;
 	var collection = db.get('datausage');
