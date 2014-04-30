@@ -60,17 +60,30 @@ router.post('/verify', function(req, res) {
 		var collection = db.get('awaitingVerification');
 		var p = collection.findOne({pin: req.body.pin, gsmnumber: req.body.gsmnumber});
 		p.on('success', function(doc) {
-			debug('PIN found! ' + doc.pin);
-			//TODO: enforce recent matches only
-			var token = "";
-			try {
-				var buf = crypto.randomBytes(32);
-				debug('have %d of random data: %s', buf.length, buf);
-			} catch (ex) {
-				// TODO handle error
+			if(!doc) {
+				debug('PIN not found');
+				res.send(400, {msg: "no recent PIN found for that GSM number"});
+			} else {
+				debug('PIN found! ' + doc.pin);
+				//TODO: enforce recent matches only
+				var token = "";
+				try {
+					var buf = crypto.randomBytes(32);
+					debug('have %d of random data: %s', buf.length, buf);
+				} catch (ex) {
+					// TODO handle error
+				}
+				token = buf.toString('hex');
+				res.send(200, {token: token});
+				// TODO store token in db and delete entries in awaitingVerification
+				var p2 = collection.remove({gsmnumber: req.body.gsmnumber});
+				p2.on('success', function (doc) {
+					debug('removed all entries for gsmnumber: ' + req.body.gsmnumber + ' from awaitingVerification collection');
+				});
+				p2.on('error', function(err) {
+					debug('could not remove PIN from db');
+				});
 			}
-			token = buf.toString('hex');
-			res.send(200, {token: token});
 		});
 		p.on('error', function(err) {
 			debug('PIN not found');
