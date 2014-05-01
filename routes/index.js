@@ -8,7 +8,7 @@ router.get('/', passport.authenticate('bearer', {session: false}), function(req,
 	debug('getting summary');
 	var db = req.db;
 	var collection = db.get('datausage');
-	collection.find({},{},function(e,docs) {
+	collection.find({unique_id: req.user.msisdn},{},function(e,docs) {
 		if(e) {
 			res.send(e);
 		}

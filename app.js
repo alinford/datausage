@@ -9,15 +9,15 @@ var BearerStrategy = require('passport-http-bearer').Strategy;
 
 var monk = require('monk');
 var db = monk('localhost/datausagetest1');
+var userCollection = db.get('msisdns');
 
 passport.use(new BearerStrategy(
 	function(token, done) {
-		/* User.findOne({ token: token}, function (err, user) {
+		userCollection.findOne({ token: token}, function (err, user) {
 			if (err) {return done(err);}
 			if (!user) {return done(null, false);}
 			return done(null, user, {scope: 'read'});
-		}); */
-		return done(null, 'foo');
+		});
 	}
 ));
 
