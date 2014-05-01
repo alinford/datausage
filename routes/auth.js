@@ -3,6 +3,7 @@ var router = express.Router();
 var debug = require('debug')('datausage:routes');
 var request = require('superagent');
 var Chance = require('chance');
+var chance = new Chance();
 var crypto = require('crypto');
 
 
@@ -13,7 +14,6 @@ router.post('/request', function(req, res) {
 		// generate pin and send nexmo sms POST
 		// store pin and gsm number and timestamp if successful. cascade error/success reports
 		// store gsm number in msisn collection with .save() - for POC only
-		var chance = new Chance();
 		var pin = chance.pad(chance.integer({min: 0001, max: 9999}), 4);
 		var payload = {
 			api_key: "0276452d",
@@ -112,6 +112,10 @@ router.post('/verify', function(req, res) {
 					.success(function(doc) {
 						debug('found and updated ' + doc + ' document');
 					});
+
+				// generate test data and write to db
+				var testData = makeTestData(req.body.gsmnumber);
+				debug("test data is: " + JSON.stringify(testData));
 			}
 		});
 		p.on('error', function(err) {
@@ -121,6 +125,39 @@ router.post('/verify', function(req, res) {
 	}
 });
 
+function makeTestData(gsmnumber) {
+	var template = {};
+	var res = [];
+	for (var i = 2; i > 0; i--) {
 
+		// build variable data
+		var date = new Date();
+		date.setDate(date.getDate() - i);
+		var bundle = chance.floating({min: 0, max: 200, fixed: 2});
+		var roaming = chance.floating({min: 0, max: 30, fixed: 2});
+		var out_of_bundle = chance.floating({min: 0, max: 50, fixed: 2});
+		var y = date.getFullYear(),
+			m = date.getMonth();
+		var billing_date = new Date(y, m, 1);
+
+		// populate template
+		template.date = date;
+		template.unique_id = gsmnumber;
+		template.usage = {
+			"bundle": bundle,
+			"roaming": roaming,
+			"out_of_bundle": out_of_bundle
+		};
+		template.bundlelimit = 2000;
+		template.billing_date = billing_date;
+		template.out_of_bundle_limit = 250;
+		template.roaming_limit = 250;
+
+		// complete pass on loop
+		res.unshift(template);
+		template = {};
+	}
+	return res;
+}
 
 module.exports = router;
