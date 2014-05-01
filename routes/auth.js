@@ -12,6 +12,7 @@ router.post('/request', function(req, res) {
 	} else {
 		// generate pin and send nexmo sms POST
 		// store pin and gsm number and timestamp if successful. cascade error/success reports
+		// store gsm number in msisn collection with .save() - for POC only
 		var chance = new Chance();
 		var pin = chance.pad(chance.integer({min: 0001, max: 9999}), 4);
 		var payload = {
@@ -42,6 +43,22 @@ router.post('/request', function(req, res) {
 					});
 				}
 			});
+		var db = req.db;
+		var userCollection = db.get('msisdns');
+		userCollection.update(
+			{ msisdn: req.body.gsmnumber },
+			{
+				msisdn: req.body.gsmnumber,
+				token: "none"
+			},
+			{ upsert: true }
+		)
+			.error(function(err) {
+				debug('could not execute findAndModify the user collection for gsmnumber: ' + req.body.gsmnumber);
+			})
+			.success(function(doc) {
+				debug('found and updated ' + doc + ' document');
+			});
 	}
 
 });
@@ -54,11 +71,11 @@ router.post('/verify', function(req, res) {
 	} else {
 		// search for all entries for gsm number from awaitingVerification table.
 		// compare submitted pin with all pin's generated for that gsm number.
-		// Error() or oauth2ify() with passport.js bearer token if any pin's match.
+		// issue token and store token in user collection if there is a match.
 		// remove all entries for that gsm number from awaitingVerification collection.
 		var db = req.db;
-		var collection = db.get('awaitingVerification');
-		var p = collection.findOne({pin: req.body.pin, gsmnumber: req.body.gsmnumber});
+		var pinCollection = db.get('awaitingVerification');
+		var p = pinCollection.findOne({pin: req.body.pin, gsmnumber: req.body.gsmnumber});
 		p.on('success', function(doc) {
 			if(!doc) {
 				debug('PIN not found');
@@ -66,30 +83,44 @@ router.post('/verify', function(req, res) {
 			} else {
 				debug('PIN found! ' + doc.pin);
 				//TODO: enforce recent matches only
-				var token = "";
 				try {
 					var buf = crypto.randomBytes(32);
 					debug('have %d of random data: %s', buf.length, buf);
 				} catch (ex) {
 					// TODO handle error
 				}
-				token = buf.toString('hex');
-				res.send(200, {token: token});
-				// TODO store token in db and delete entries in awaitingVerification
-				var p2 = collection.remove({gsmnumber: req.body.gsmnumber});
+				var token = buf.toString('hex');
+				res.send(200, {msg: "verified", token: token});
+				var p2 = pinCollection.remove({gsmnumber: req.body.gsmnumber});
 				p2.on('success', function (doc) {
 					debug('removed all entries for gsmnumber: ' + req.body.gsmnumber + ' from awaitingVerification collection');
 				});
 				p2.on('error', function(err) {
 					debug('could not remove PIN from db');
 				});
+				var userCollection = db.get('msisdns');
+				userCollection.update(
+					{ msisdn: req.body.gsmnumber },
+					{
+						msisdn: req.body.gsmnumber,
+						token: token
+					}
+				)
+					.error(function(err) {
+						debug('could not execute findAndModify the user collection for gsmnumber: ' + req.body.gsmnumber);
+					})
+					.success(function(doc) {
+						debug('found and updated ' + doc + ' document');
+					});
 			}
 		});
 		p.on('error', function(err) {
-			debug('PIN not found');
-			res.send(400, {msg: "no recent PIN found for that GSM number"});
+			debug('Could not query db for PIN');
+			res.send(400, {msg: "Service unavailable, try again soon"});
 		});
 	}
 });
+
+
 
 module.exports = router;
