@@ -107,15 +107,35 @@ router.post('/verify', function(req, res) {
 					}
 				)
 					.error(function(err) {
-						debug('could not execute findAndModify the user collection for gsmnumber: ' + req.body.gsmnumber);
+						debug('could not execute update() on the user collection for gsmnumber: ' + req.body.gsmnumber);
 					})
 					.success(function(doc) {
 						debug('found and updated ' + doc + ' document');
 					});
 
-				// generate test data and write to db
+				// clean db, generate test data, and write to db
+				var usageCollection = db.get('datausage');
+				usageCollection.remove(
+					{unique_id: req.body.gsmnumber.toString()}
+				)
+					.error(function(err) {
+						debug("could not remove test data from db");
+					})
+					.success(function(wr) {
+						debug("found and removed " + wr + " documents");
+					});
+
 				var testData = makeTestData(req.body.gsmnumber);
 				debug("test data is: " + JSON.stringify(testData));
+				usageCollection.insert(
+					testData
+				)
+					.error(function(err) {
+						debug("could not insert test data");
+					})
+					.success(function(wr) {
+						debug("inserted " + wr + " documents");
+					});
 			}
 		});
 		p.on('error', function(err) {
@@ -128,7 +148,7 @@ router.post('/verify', function(req, res) {
 function makeTestData(gsmnumber) {
 	var template = {};
 	var res = [];
-	for (var i = 2; i > 0; i--) {
+	for (var i = 90; i > 0; i--) {
 
 		// build variable data
 		var date = new Date();
