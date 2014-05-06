@@ -158,7 +158,9 @@ function makeTestData(gsmnumber) {
 		var out_of_bundle = chance.floating({min: 0, max: 50, fixed: 2});
 		var y = date.getFullYear(),
 			m = date.getMonth();
-		var billing_date = new Date(y, m, 1);
+		var billing_start_date = new Date(y, m, 1);
+		var billing_end_date = new Date(billing_start_date.getDate());
+		billing_end_date.setMonth(billing_start_date.getMonth() + 1);
 
 		// populate template
 		template.date = date;
@@ -168,8 +170,9 @@ function makeTestData(gsmnumber) {
 			"roaming": roaming,
 			"out_of_bundle": out_of_bundle
 		};
-		template.bundlelimit = 5000;
-		template.billing_date = billing_date;
+		template.bundle_limit = 5000;
+		template.billing_start_date = billing_start_date;
+		template.billing_end_date = billing_end_date;
 		template.out_of_bundle_limit = 250;
 		template.roaming_limit = 250;
 
