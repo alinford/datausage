@@ -152,15 +152,15 @@ function makeTestData(gsmnumber) {
 
 		// build variable data
 		var date = new Date();
+		var billing_start_date = new Date(y, m, 1);
 		date.setDate(date.getDate() - i);
 		var bundle = chance.floating({min: 0, max: 200, fixed: 2});
 		var roaming = chance.floating({min: 0, max: 30, fixed: 2});
 		var out_of_bundle = chance.floating({min: 0, max: 50, fixed: 2});
 		var y = date.getFullYear(),
 			m = date.getMonth();
-		var billing_start_date = new Date(y, m, 1);
 		var billing_end_date = new Date(y,m,1);
-		billing_end_date.setDate(billing_start_date.getMonth() + 1);
+		billing_end_date.setMonth(billing_start_date.getMonth() + 1);
 
 		// populate template
 		template.date = date;
