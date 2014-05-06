@@ -159,7 +159,7 @@ function makeTestData(gsmnumber) {
 		var y = date.getFullYear(),
 			m = date.getMonth();
 		var billing_start_date = new Date(y, m, 1);
-		var billing_end_date = new Date();
+		var billing_end_date = new Date(y,m,1);
 		billing_end_date.setDate(billing_start_date.getMonth() + 1);
 
 		// populate template
