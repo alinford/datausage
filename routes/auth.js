@@ -168,7 +168,7 @@ function makeTestData(gsmnumber) {
 			"roaming": roaming,
 			"out_of_bundle": out_of_bundle
 		};
-		template.bundlelimit = 2000;
+		template.bundlelimit = 5000;
 		template.billing_date = billing_date;
 		template.out_of_bundle_limit = 250;
 		template.roaming_limit = 250;
